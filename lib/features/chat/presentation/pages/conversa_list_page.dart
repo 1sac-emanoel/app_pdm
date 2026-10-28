@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pdm_isac/features/chat/infra/data/conversa_repository.dart';
-import 'package:pdm_isac/features/chat/presentation/bloc/conversa_list_block.dart';
+import 'package:pdm_isac/features/chat/presentation/bloc/conversa_list_bloc.dart';
+import 'package:pdm_isac/features/chat/presentation/bloc/conversa_list_event.dart';
 import 'package:pdm_isac/features/chat/presentation/bloc/conversa_list_state.dart';
 
 class ConversaListPage extends StatelessWidget {
-  final ConversaRepository repo = ConversaRepository();
-
-  ConversaListPage({super.key});
+  const ConversaListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,10 +17,13 @@ class ConversaListPage extends StatelessWidget {
           builder: (context, state) {
             if (state is ConversaListSuccess) {
               return ListView.builder(
-                itemCount: repo.conversas.length,
+                itemCount: state.conversas.length,
                 itemBuilder: (context, i) {
-                  final conversa = repo.conversas[i];
+                  final conversa = state.conversas[i];
                   return ListTile(
+                    onTap: () {
+                      context.read<ConversaListBloc>().add(ConvesaListDuplicaConversa(conversa: conversa));
+                    },
                     title: Text(conversa.contato),
                     subtitle: Text(conversa.ultimaMsg),
                     leading: CircleAvatar(
@@ -45,10 +46,23 @@ class ConversaListPage extends StatelessWidget {
             }
 
             if (state is ConversaListFailure) {
-              return const Center(child: Text('Erro ao carregar conversas'));
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Center(
+                    child: Text(
+                      "Ops! Falhouuu mane.",
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                  ),
+                ],
+              );
             }
 
-            return const Center(child: CircularProgressIndicator());
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [Center(child: CircularProgressIndicator())],
+            );
           },
         ),
       ),
